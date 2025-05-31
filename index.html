@@ -4,9 +4,33 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Estado de Ánimo - Clase Inclusiva</title>
+
   <link rel="stylesheet" href="style.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#e63946" />
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js"></script>
+
+  <script>
+    // Tu configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCzkOdieLyx3EwofzjmJIXZXD86HXxwd1U",
+      authDomain: "estado-animo-clase.firebaseapp.com",
+      projectId: "estado-animo-clase",
+      storageBucket: "estado-animo-clase.firebasestorage.app",
+      messagingSenderId: "690883949927",
+      appId: "1:690883949927:web:d8d9f33c41f8df99d5ebc2",
+      measurementId: "G-DHQ6ELF0X8"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const analytics = firebase.analytics();
+  </script>
 </head>
 <body>
   <div class="container">
@@ -62,25 +86,11 @@
 
     <div id="resultado" class="resultado"></div>
   </div>
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "TU_API_KEY",
-    authDomain: "TU_DOMINIO.firebaseapp.com",
-    projectId: "estado-animo-clase",
-    storageBucket: "estado-animo-clase.appspot.com",
-    messagingSenderId: "XXXXXX",
-    appId: "TU_APP_ID"
-  };
-
-  // Inicializar Firebase
-  const app = firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-</script>
+  <!-- Tu script principal -->
   <script src="script.js"></script>
+
+  <!-- Registrar service worker para PWA -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
