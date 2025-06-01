@@ -1,4 +1,6 @@
-// Inicializar Firebase directamente aquí
+// Asegúrate de que Firebase esté cargado en index.html antes de este script
+
+// ✅ Inicializar Firebase aquí
 const firebaseConfig = {
   apiKey: "AIzaSyCzkOdieLyx3EwofzjmJIXZXD86HXxwd1U",
   authDomain: "estado-animo-clase.firebaseapp.com",
@@ -9,10 +11,15 @@ const firebaseConfig = {
   measurementId: "G-DHQ6ELF0X8"
 };
 
-firebase.initializeApp(firebaseConfig);
+// 🚨 Si ya está inicializado, no lo vuelvas a hacer
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
 const db = firebase.firestore();
 firebase.analytics();
 
+// ✅ Función para enviar los datos
 async function enviarEstado() {
   const estado = document.querySelector('input[name="estado"]:checked');
   const mensaje = document.getElementById('mensaje').value.trim();
@@ -50,4 +57,3 @@ async function enviarEstado() {
     resultado.textContent = "❌ Hubo un problema al enviar tus datos. Intenta nuevamente.";
   }
 }
-
