@@ -1,9 +1,23 @@
+// Inicializar Firebase directamente aquí
+const firebaseConfig = {
+  apiKey: "AIzaSyCzkOdieLyx3EwofzjmJIXZXD86HXxwd1U",
+  authDomain: "estado-animo-clase.firebaseapp.com",
+  projectId: "estado-animo-clase",
+  storageBucket: "estado-animo-clase.firebasestorage.app",
+  messagingSenderId: "690883949927",
+  appId: "1:690883949927:web:d8d9f33c41f8df99d5ebc2",
+  measurementId: "G-DHQ6ELF0X8"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+firebase.analytics();
+
 async function enviarEstado() {
   const estado = document.querySelector('input[name="estado"]:checked');
   const mensaje = document.getElementById('mensaje').value.trim();
   const resultado = document.getElementById('resultado');
 
-  // Validación: el usuario debe seleccionar un estado
   if (!estado) {
     resultado.textContent = "⚠️ Por favor, selecciona tu estado de ánimo.";
     resultado.style.backgroundColor = "#fff3cd";
@@ -11,7 +25,6 @@ async function enviarEstado() {
     return;
   }
 
-  // Crear objeto con los datos a guardar
   const nuevaRespuesta = {
     estado: parseInt(estado.value),
     comentario: mensaje || null,
@@ -19,10 +32,8 @@ async function enviarEstado() {
   };
 
   try {
-    // Guardar en la colección 'respuestas'
     await db.collection("respuestas").add(nuevaRespuesta);
 
-    // Mostrar mensaje de confirmación
     resultado.style.backgroundColor = "#fceaea";
     resultado.style.color = "#e63946";
     resultado.innerHTML = `
@@ -31,7 +42,6 @@ async function enviarEstado() {
       ${mensaje ? `<strong>Comentario:</strong> ${mensaje}` : ""}
     `;
 
-    // Resetear formulario
     document.getElementById("formulario").reset();
   } catch (error) {
     console.error("Error al guardar en Firestore:", error);
@@ -40,3 +50,4 @@ async function enviarEstado() {
     resultado.textContent = "❌ Hubo un problema al enviar tus datos. Intenta nuevamente.";
   }
 }
+
