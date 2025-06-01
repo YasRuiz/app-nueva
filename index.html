@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#e63946" />
 
-  <!-- Firebase SDKs (deben ir antes de script.js) -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js"></script>
@@ -62,16 +62,17 @@
       <label for="mensaje">¿Quieres dejar un comentario adicional?</label>
       <textarea id="mensaje" placeholder="Puedes escribir lo que necesites para que tu profesor entienda tu estado..."></textarea>
 
-      <button type="button" onclick="enviarEstado()">Enviar</button>
+      <!-- Botón desactivado hasta que Firebase esté listo -->
+      <button id="enviarBtn" type="button" disabled>Enviar</button>
     </form>
 
     <div id="resultado" class="resultado"></div>
   </div>
 
-  <!-- Tu script que inicializa Firebase y usa Firestore -->
+  <!-- Tu script que inicializa Firebase y controla todo -->
   <script src="script.js"></script>
 
-  <!-- Registrar el Service Worker para PWA -->
+  <!-- Registrar Service Worker para PWA -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
@@ -81,5 +82,6 @@
   </script>
 </body>
 </html>
+
 
 
