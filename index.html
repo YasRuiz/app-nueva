@@ -14,8 +14,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js"></script>
 
+  <!-- Inicializar Firebase ANTES de cargar script.js -->
   <script>
-    // Tu configuración personalizada de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCzkOdieLyx3EwofzjmJIXZXD86HXxwd1U",
       authDomain: "estado-animo-clase.firebaseapp.com",
@@ -26,7 +26,6 @@
       measurementId: "G-DHQ6ELF0X8"
     };
 
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const analytics = firebase.analytics();
@@ -77,7 +76,6 @@
         </label>
       </div>
 
-      <!-- Comentario adicional -->
       <label for="mensaje">¿Quieres dejar un comentario adicional?</label>
       <textarea id="mensaje" placeholder="Puedes escribir lo que necesites para que tu profesor entienda tu estado..."></textarea>
 
@@ -87,10 +85,10 @@
     <div id="resultado" class="resultado"></div>
   </div>
 
-  <!-- Script principal -->
+  <!-- Tu script que usa Firebase -->
   <script src="script.js"></script>
 
-  <!-- Registro del Service Worker para PWA -->
+  <!-- Registrar Service Worker para PWA -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
