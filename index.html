@@ -15,7 +15,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js"></script>
 
   <script>
-    // Tu configuración de Firebase
+    // Tu configuración personalizada de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCzkOdieLyx3EwofzjmJIXZXD86HXxwd1U",
       authDomain: "estado-animo-clase.firebaseapp.com",
@@ -87,10 +87,10 @@
     <div id="resultado" class="resultado"></div>
   </div>
 
-  <!-- Tu script principal -->
+  <!-- Script principal -->
   <script src="script.js"></script>
 
-  <!-- Registrar service worker para PWA -->
+  <!-- Registro del Service Worker para PWA -->
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
@@ -100,3 +100,4 @@
   </script>
 </body>
 </html>
+
