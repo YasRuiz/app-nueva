@@ -1,8 +1,6 @@
-let db; // Declaramos db en el ámbito global
+let db; // Declarada globalmente
 
-// Esperamos a que toda la página haya cargado
 window.addEventListener("load", () => {
-  // Configuración de Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyCzkOdieLyx3EwofzjmJIXZXD86HXxwd1U",
     authDomain: "estado-animo-clase.firebaseapp.com",
@@ -13,13 +11,16 @@ window.addEventListener("load", () => {
     measurementId: "G-DHQ6ELF0X8"
   };
 
-  // Inicializamos Firebase y Firestore
   firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
   firebase.analytics();
+
+  // ✅ Ahora que Firestore está listo, activamos el botón
+  const enviarBtn = document.getElementById("enviarBtn");
+  enviarBtn.disabled = false;
+  enviarBtn.onclick = enviarEstado; // asignamos la función al botón
 });
 
-// Función para enviar estado
 async function enviarEstado() {
   const estado = document.querySelector('input[name="estado"]:checked');
   const mensaje = document.getElementById('mensaje').value.trim();
@@ -39,9 +40,6 @@ async function enviarEstado() {
   };
 
   try {
-    // ✅ Usamos db solo cuando ya fue definido por window.onload
-    if (!db) throw new Error("Firestore no está listo aún.");
-
     await db.collection("respuestas").add(nuevaRespuesta);
 
     resultado.style.backgroundColor = "#fceaea";
@@ -60,3 +58,4 @@ async function enviarEstado() {
     resultado.textContent = "❌ Hubo un problema al enviar tus datos. Intenta nuevamente.";
   }
 }
+
