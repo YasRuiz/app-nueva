@@ -17,3 +17,5 @@ Una aplicación web educativa que permite a los estudiantes expresar su estado e
 ---
 
 ## 📁 Estructura del proyecto
+
+/ (raíz) ├── index.html              # Página principal para alumnos ├── login.html              # Inicio de sesión (email o invitado) ├── registro.html           # Registro de nuevos usuarios ├── docente.html            # Panel exclusivo para docentes ├── offline.html            # Página de error offline personalizada ├── manifest.json           # Archivo PWA ├── service-worker.js       # Lógica offline ├── auth.js                 # Módulo centralizado de Firebase Auth ├── style.css               # Todos los estilos └── /img/ ├── icon-192.png └── icon-512.png
