@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Estado de Ánimo - Clase Inclusiva</title>
 
-  <!-- Favicon (carita en dado de colores) -->
   <link rel="icon" href="img/favicon.ico" type="image/x-icon" />
-  <!-- Si es PNG: -->
-  <!-- <link rel="icon" href="img/favicon.png" type="image/png" /> -->
-
   <link rel="stylesheet" href="style.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#e63946" />
@@ -20,8 +16,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>¿Cómo te sientes antes de entrar a clase?</h1>
+  <div class="container" id="main-container">
+    <button id="accesibilidadBtn">🧩 Accesibilidad</button>
+
+    <h1 tabindex="0">¿Cómo te sientes antes de entrar a clase?</h1>
 
     <form id="formulario">
       <p>Selecciona tu estado de ánimo:</p>
@@ -29,38 +27,23 @@
       <div class="emoji-selector">
         <label>
           <input type="radio" name="estado" value="1" />
-          <div class="emoji-box">
-            😔<br>
-            <span class="emoji-label">1 - Muy mal</span>
-          </div>
+          <div class="emoji-box">😔<br><span class="emoji-label">1 - Muy mal</span></div>
         </label>
         <label>
           <input type="radio" name="estado" value="2" />
-          <div class="emoji-box">
-            😟<br>
-            <span class="emoji-label">2 - Mal</span>
-          </div>
+          <div class="emoji-box">😟<br><span class="emoji-label">2 - Mal</span></div>
         </label>
         <label>
           <input type="radio" name="estado" value="3" />
-          <div class="emoji-box">
-            😐<br>
-            <span class="emoji-label">3 - Regular</span>
-          </div>
+          <div class="emoji-box">😐<br><span class="emoji-label">3 - Regular</span></div>
         </label>
         <label>
           <input type="radio" name="estado" value="4" />
-          <div class="emoji-box">
-            🙂<br>
-            <span class="emoji-label">4 - Bien</span>
-          </div>
+          <div class="emoji-box">🙂<br><span class="emoji-label">4 - Bien</span></div>
         </label>
         <label>
           <input type="radio" name="estado" value="5" />
-          <div class="emoji-box">
-            😄<br>
-            <span class="emoji-label">5 - Excelente</span>
-          </div>
+          <div class="emoji-box">😄<br><span class="emoji-label">5 - Excelente</span></div>
         </label>
       </div>
 
@@ -71,12 +54,110 @@
     </form>
 
     <div id="resultado" class="resultado"></div>
+
+    <div id="actividad" class="actividad-sugerida" style="display: none;">
+      <h2>Actividad recomendada</h2>
+      <p id="sugerencia-texto"></p>
+    </div>
   </div>
 
-  <!-- Tu script que inicializa Firebase y controla Firestore -->
-  <script src="script.js"></script>
+  <script>
+    let db;
 
-  <!-- Registrar Service Worker -->
+    window.addEventListener("load", () => {
+      const firebaseConfig = {
+        apiKey: "AIzaSyCzkOdieLyx3EwofzjmJIXZXD86HXxwd1U",
+        authDomain: "estado-animo-clase.firebaseapp.com",
+        projectId: "estado-animo-clase",
+        storageBucket: "estado-animo-clase.firebasestorage.app",
+        messagingSenderId: "690883949927",
+        appId: "1:690883949927:web:d8d9f33c41f8df99d5ebc2",
+        measurementId: "G-DHQ6ELF0X8"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      firebase.analytics();
+
+      const enviarBtn = document.getElementById("enviarBtn");
+      enviarBtn.disabled = false;
+      enviarBtn.onclick = enviarEstado;
+    });
+
+    const sugerencias = {
+      1: "Haz 3 respiraciones profundas. Cierra los ojos, cuenta hasta 5 mientras inhalas.",
+      2: "Estírate por 1 minuto o escucha tu canción favorita.",
+      3: "Cuenta 5 cosas que puedes ver, 4 que puedes tocar... ayuda a enfocarte.",
+      4: "¡Sigue así! Dibuja algo que te guste o cuéntale a alguien algo bueno.",
+      5: "¡Fantástico! ¿Por qué no escribes algo positivo que te pasó hoy?"
+    };
+
+    async function enviarEstado() {
+      const estado = document.querySelector('input[name="estado"]:checked');
+      const mensaje = document.getElementById('mensaje').value.trim();
+      const resultado = document.getElementById('resultado');
+      const actividadDiv = document.getElementById('actividad');
+      const sugerenciaTexto = document.getElementById('sugerencia-texto');
+
+      if (!estado) {
+        resultado.textContent = "⚠️ Por favor, selecciona tu estado de ánimo.";
+        resultado.style.backgroundColor = "#fff3cd";
+        resultado.style.color = "#856404";
+        actividadDiv.style.display = "none";
+        return;
+      }
+
+      const nuevaRespuesta = {
+        estado: parseInt(estado.value),
+        comentario: mensaje || null,
+        fecha: new Date().toISOString()
+      };
+
+      try {
+        await db.collection("respuestas").add(nuevaRespuesta);
+
+        resultado.style.backgroundColor = "#fceaea";
+        resultado.style.color = "#e63946";
+        resultado.innerHTML = `
+          ✅ ¡Gracias por compartir tu estado!<br>
+          <strong>Estado:</strong> ${estado.value}<br>
+          ${mensaje ? `<strong>Comentario:</strong> ${mensaje}` : ""}
+        `;
+
+        // Mostrar actividad y leerla en voz alta
+        const texto = sugerencias[estado.value] || "";
+        sugerenciaTexto.textContent = texto;
+        actividadDiv.style.display = "block";
+        leerTexto(texto);
+
+        document.getElementById("formulario").reset();
+        document.getElementById("enviarBtn").disabled = true;
+      } catch (error) {
+        console.error("Error al guardar en Firestore:", error);
+        resultado.style.color = "red";
+        resultado.style.backgroundColor = "#fceaea";
+        resultado.textContent = "❌ Hubo un problema al enviar tus datos. Intenta nuevamente.";
+        actividadDiv.style.display = "none";
+      }
+    }
+
+    function leerTexto(texto) {
+      const utterance = new SpeechSynthesisUtterance(texto);
+      utterance.lang = "es-ES";
+      speechSynthesis.speak(utterance);
+    }
+
+    // Botón accesibilidad
+    document.getElementById("accesibilidadBtn").addEventListener("click", () => {
+      document.body.classList.toggle("modo-accesible");
+    });
+
+    document.addEventListener("change", () => {
+      const estado = document.querySelector('input[name="estado"]:checked');
+      document.getElementById("enviarBtn").disabled = !estado;
+    });
+  </script>
+
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
