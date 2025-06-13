@@ -13,6 +13,7 @@
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js"></script>
 </head>
 <body>
@@ -61,28 +62,32 @@
     </div>
   </div>
 
-  <script>
-    let db;
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
 
-    window.addEventListener("load", () => {
-      const firebaseConfig = {
-        apiKey: "AIzaSyCzkOdieLyx3EwofzjmJIXZXD86HXxwd1U",
-        authDomain: "estado-animo-clase.firebaseapp.com",
-        projectId: "estado-animo-clase",
-        storageBucket: "estado-animo-clase.firebasestorage.app",
-        messagingSenderId: "690883949927",
-        appId: "1:690883949927:web:d8d9f33c41f8df99d5ebc2",
-        measurementId: "G-DHQ6ELF0X8"
-      };
+    const firebaseConfig = {
+      apiKey: "AIzaSyCzkOdieLyx3EwofzjmJIXZXD86HXxwd1U",
+      authDomain: "estado-animo-clase.firebaseapp.com",
+      projectId: "estado-animo-clase",
+      storageBucket: "estado-animo-clase.firebasestorage.app",
+      messagingSenderId: "690883949927",
+      appId: "1:690883949927:web:d8d9f33c41f8df99d5ebc2",
+      measurementId: "G-DHQ6ELF0X8"
+    };
 
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-      firebase.analytics();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const analytics = getAnalytics(app);
 
-      const enviarBtn = document.getElementById("enviarBtn");
-      enviarBtn.disabled = false;
-      enviarBtn.onclick = enviarEstado;
-    });
+    const enviarBtn = document.getElementById("enviarBtn");
+    const resultado = document.getElementById('resultado');
+    const actividadDiv = document.getElementById('actividad');
+    const sugerenciaTexto = document.getElementById('sugerencia-texto');
+    let usuario = null;
 
     const sugerencias = {
       1: "Haz 3 respiraciones profundas. Cierra los ojos, cuenta hasta 5 mientras inhalas.",
@@ -92,12 +97,24 @@
       5: "¡Fantástico! ¿Por qué no escribes algo positivo que te pasó hoy?"
     };
 
-    async function enviarEstado() {
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html"; // Si no hay sesión, redirigir
+        return;
+      }
+      usuario = user;
+
+      if (user.isAnonymous) {
+        resultado.textContent = "Modo invitado: tu respuesta no será guardada.";
+      }
+
+      enviarBtn.disabled = false;
+      enviarBtn.addEventListener("click", () => enviarEstado(user));
+    });
+
+    async function enviarEstado(user) {
       const estado = document.querySelector('input[name="estado"]:checked');
       const mensaje = document.getElementById('mensaje').value.trim();
-      const resultado = document.getElementById('resultado');
-      const actividadDiv = document.getElementById('actividad');
-      const sugerenciaTexto = document.getElementById('sugerencia-texto');
 
       if (!estado) {
         resultado.textContent = "⚠️ Por favor, selecciona tu estado de ánimo.";
@@ -107,15 +124,25 @@
         return;
       }
 
+      const texto = sugerencias[estado.value] || "";
+      sugerenciaTexto.textContent = texto;
+      actividadDiv.style.display = "block";
+      leerTexto(texto);
+
+      if (user.isAnonymous) {
+        resultado.innerHTML = `✅ Gracias por participar. (Modo invitado - no se guardó información)`;
+        return;
+      }
+
       const nuevaRespuesta = {
+        uid: user.uid,
         estado: parseInt(estado.value),
         comentario: mensaje || null,
         fecha: new Date().toISOString()
       };
 
       try {
-        await db.collection("respuestas").add(nuevaRespuesta);
-
+        await addDoc(collection(db, "respuestas"), nuevaRespuesta);
         resultado.style.backgroundColor = "#fceaea";
         resultado.style.color = "#e63946";
         resultado.innerHTML = `
@@ -123,21 +150,13 @@
           <strong>Estado:</strong> ${estado.value}<br>
           ${mensaje ? `<strong>Comentario:</strong> ${mensaje}` : ""}
         `;
-
-        // Mostrar actividad y leerla en voz alta
-        const texto = sugerencias[estado.value] || "";
-        sugerenciaTexto.textContent = texto;
-        actividadDiv.style.display = "block";
-        leerTexto(texto);
-
         document.getElementById("formulario").reset();
-        document.getElementById("enviarBtn").disabled = true;
+        enviarBtn.disabled = true;
       } catch (error) {
         console.error("Error al guardar en Firestore:", error);
         resultado.style.color = "red";
         resultado.style.backgroundColor = "#fceaea";
         resultado.textContent = "❌ Hubo un problema al enviar tus datos. Intenta nuevamente.";
-        actividadDiv.style.display = "none";
       }
     }
 
@@ -152,9 +171,10 @@
       document.body.classList.toggle("modo-accesible");
     });
 
+    // Habilitar botón enviar al seleccionar opción
     document.addEventListener("change", () => {
       const estado = document.querySelector('input[name="estado"]:checked');
-      document.getElementById("enviarBtn").disabled = !estado;
+      enviarBtn.disabled = !estado;
     });
   </script>
 
