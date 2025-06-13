@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE html><html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Panel Docente - Estado de Ánimo</title>
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
@@ -14,52 +11,53 @@
 </head>
 <body>
   <div class="container">
-    <h1>📊 Resumen de respuestas</h1>
+    <h1>Panel Docente - Estado de Ánimo</h1>
+    <button id="logoutBtn">Cerrar sesión</button><div style="margin-top: 20px">
+  <label>Desde: <input type="date" id="fechaInicio" /></label>
+  <label>Hasta: <input type="date" id="fechaFin" /></label>
+  <label>Estado:
+    <select id="filtroEstado">
+      <option value="todos">Todos</option>
+      <option value="1">1 - Muy mal</option>
+      <option value="2">2 - Mal</option>
+      <option value="3">3 - Regular</option>
+      <option value="4">4 - Bien</option>
+      <option value="5">5 - Excelente</option>
+    </select>
+  </label>
+  <button id="filtrarBtn">Filtrar</button>
+</div>
 
-    <button id="logoutBtn">🔒 Cerrar sesión</button>
+<button id="exportar">Exportar CSV</button>
 
-    <div style="margin-top: 20px;">
-      <label>Desde: <input type="date" id="fechaInicio" /></label>
-      <label>Hasta: <input type="date" id="fechaFin" /></label>
-      <label>Estado:
-        <select id="filtroEstado">
-          <option value="todos">Todos</option>
-          <option value="1">1 - Muy mal</option>
-          <option value="2">2 - Mal</option>
-          <option value="3">3 - Regular</option>
-          <option value="4">4 - Bien</option>
-          <option value="5">5 - Excelente</option>
-        </select>
-      </label>
-      <button id="filtrarBtn">🔍 Filtrar</button>
-    </div>
+<h2>Respuestas</h2>
+<table>
+  <thead>
+    <tr><th>Fecha</th><th>Estado</th><th>Comentario</th></tr>
+  </thead>
+  <tbody id="tabla-respuestas">
+    <tr><td colspan="3">Cargando...</td></tr>
+  </tbody>
+</table>
 
-    <button id="exportar">📥 Exportar a CSV</button>
+<h2>Promedio por día</h2>
+<table>
+  <thead>
+    <tr><th>Fecha</th><th>Promedio de estado</th></tr>
+  </thead>
+  <tbody id="tabla-promedios"></tbody>
+</table>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Estado</th>
-          <th>Comentario</th>
-        </tr>
-      </thead>
-      <tbody id="tabla-respuestas">
-        <tr><td colspan="3">Cargando...</td></tr>
-      </tbody>
-    </table>
+<h2>Gráfico de barras (Cantidad)</h2>
+<canvas id="graficoBarras"></canvas>
 
-    <div id="grafico-container">
-      <h2>Gráfico de estados de ánimo</h2>
-      <canvas id="grafico"></canvas>
-    </div>
-  </div>
+<h2>Gráfico de pastel (Porcentaje)</h2>
+<canvas id="graficoPastel"></canvas>
 
-  <script type="module">
+  </div>  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
     import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCzkOdieLyx3EwofzjmJIXZXD86HXxwd1U",
@@ -75,6 +73,7 @@
     const auth = getAuth(app);
 
     const tabla = document.getElementById("tabla-respuestas");
+    const tablaPromedios = document.getElementById("tabla-promedios");
     const exportarBtn = document.getElementById("exportar");
     const logoutBtn = document.getElementById("logoutBtn");
     const fechaInicio = document.getElementById("fechaInicio");
@@ -82,37 +81,23 @@
     const filtroEstado = document.getElementById("filtroEstado");
     const filtrarBtn = document.getElementById("filtrarBtn");
 
-    const estadoLabels = ["1 - Muy mal", "2 - Mal", "3 - Regular", "4 - Bien", "5 - Excelente"];
-    let estadoCounts = [0, 0, 0, 0, 0];
+    let respuestas = [];
     let datosCSV = [["Fecha", "Estado", "Comentario"]];
-    let respuestasTotales = [];
+
+    const estadoLabels = ["1 - Muy mal", "2 - Mal", "3 - Regular", "4 - Bien", "5 - Excelente"];
+    let chartBarras, chartPastel;
 
     onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-        return;
-      }
-
+      if (!user) return location.href = "login.html";
       const docSnap = await getDoc(doc(db, "usuarios", user.uid));
-      if (!docSnap.exists() || docSnap.data().rol !== "docente") {
-        alert("Acceso restringido solo para docentes.");
-        window.location.href = "index.html";
-        return;
-      }
-
+      if (!docSnap.exists() || docSnap.data().rol !== "docente") return location.href = "index.html";
       cargarDatos();
     });
 
     async function cargarDatos() {
       const q = query(collection(db, "respuestas"), orderBy("fecha", "desc"));
-      const querySnapshot = await getDocs(q);
-      respuestasTotales = [];
-
-      querySnapshot.forEach(doc => {
-        const data = doc.data();
-        respuestasTotales.push(data);
-      });
-
+      const snapshot = await getDocs(q);
+      respuestas = snapshot.docs.map(doc => doc.data());
       aplicarFiltros();
     }
 
@@ -121,84 +106,86 @@
       const fin = fechaFin.value ? new Date(fechaFin.value + "T23:59:59") : null;
       const estadoFiltro = filtroEstado.value;
 
-      estadoCounts = [0, 0, 0, 0, 0];
+      let estadoCounts = [0, 0, 0, 0, 0];
       datosCSV = [["Fecha", "Estado", "Comentario"]];
       tabla.innerHTML = "";
 
-      const filtradas = respuestasTotales.filter((r) => {
-        const fecha = new Date(r.fecha);
-        const cumpleFecha = (!inicio || fecha >= inicio) && (!fin || fecha <= fin);
-        const cumpleEstado = (estadoFiltro === "todos") || (r.estado == estadoFiltro);
-        return cumpleFecha && cumpleEstado;
+      const agrupados = {};
+
+      const filtradas = respuestas.filter((r) => {
+        const f = new Date(r.fecha);
+        const okFecha = (!inicio || f >= inicio) && (!fin || f <= fin);
+        const okEstado = estadoFiltro === "todos" || r.estado == estadoFiltro;
+        return okFecha && okEstado;
       });
 
       if (filtradas.length === 0) {
-        tabla.innerHTML = "<tr><td colspan='3'>No hay resultados para ese filtro.</td></tr>";
-        generarGrafico();
+        tabla.innerHTML = "<tr><td colspan='3'>Sin datos</td></tr>";
+        tablaPromedios.innerHTML = "";
+        renderGraficos([0,0,0,0,0], []);
         return;
       }
 
-      filtradas.forEach((data) => {
-        const fecha = new Date(data.fecha).toLocaleString();
-        const estado = data.estado;
-        const comentario = data.comentario || "-";
+      filtradas.forEach((d) => {
+        const fechaTexto = new Date(d.fecha).toLocaleString();
+        const estado = d.estado;
+        const comentario = d.comentario || "-";
+        tabla.innerHTML += `<tr><td>${fechaTexto}</td><td>${estado}</td><td>${comentario}</td>`;
+        datosCSV.push([fechaTexto, estado, comentario]);
+        if (estado >= 1 && estado <= 5) estadoCounts[estado - 1]++;
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${fecha}</td><td>${estado}</td><td>${comentario}</td>`;
-        tabla.appendChild(tr);
-
-        if (estado >= 1 && estado <= 5) {
-          estadoCounts[estado - 1]++;
-        }
-
-        datosCSV.push([fecha, estado, comentario]);
+        const dia = new Date(d.fecha).toISOString().slice(0, 10);
+        if (!agrupados[dia]) agrupados[dia] = [];
+        agrupados[dia].push(estado);
       });
 
-      generarGrafico();
+      tablaPromedios.innerHTML = "";
+      Object.entries(agrupados).forEach(([dia, estados]) => {
+        const promedio = (estados.reduce((a,b)=>a+b,0) / estados.length).toFixed(2);
+        tablaPromedios.innerHTML += `<tr><td>${dia}</td><td>${promedio}</td></tr>`;
+      });
+
+      renderGraficos(estadoCounts, filtradas);
     }
 
-    function generarGrafico() {
-      const ctx = document.getElementById("grafico").getContext("2d");
-      if (window.miGrafico) {
-        window.miGrafico.destroy(); // Destruye el anterior si existe
-      }
-      window.miGrafico = new Chart(ctx, {
+    function renderGraficos(counts, filtradas) {
+      const total = counts.reduce((a, b) => a + b, 0);
+      const porcentajes = counts.map(c => total ? ((c / total) * 100).toFixed(1) : 0);
+
+      const barras = document.getElementById("graficoBarras").getContext("2d");
+      if (chartBarras) chartBarras.destroy();
+      chartBarras = new Chart(barras, {
         type: "bar",
         data: {
           labels: estadoLabels,
-          datasets: [{
-            label: "Cantidad de respuestas",
-            data: estadoCounts,
-            borderWidth: 1
-          }]
+          datasets: [{ label: "Cantidad", data: counts }]
         },
-        options: {
-          responsive: true,
-          scales: {
-            y: { beginAtZero: true }
-          }
-        }
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+
+      const pastel = document.getElementById("graficoPastel").getContext("2d");
+      if (chartPastel) chartPastel.destroy();
+      chartPastel = new Chart(pastel, {
+        type: "pie",
+        data: {
+          labels: estadoLabels.map((l, i) => `${l} (${porcentajes[i]}%)`),
+          datasets: [{ data: counts }]
+        },
+        options: { responsive: true }
       });
     }
 
+    filtrarBtn.addEventListener("click", aplicarFiltros);
     exportarBtn.addEventListener("click", () => {
-      const csvContent = "data:text/csv;charset=utf-8," +
-        datosCSV.map(e => e.join(",")).join("\n");
-      const encodedUri = encodeURI(csvContent);
+      const csv = "data:text/csv;charset=utf-8," + datosCSV.map(e => e.join(",")).join("\n");
+      const uri = encodeURI(csv);
       const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "respuestas_estado_animo.csv");
+      link.href = uri;
+      link.download = "respuestas.csv";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     });
-
-    logoutBtn.addEventListener("click", async () => {
-      await signOut(auth);
-      window.location.href = "login.html";
-    });
-
-    filtrarBtn.addEventListener("click", aplicarFiltros);
-  </script>
-</body>
+    logoutBtn.addEventListener("click", () => signOut(auth).then(() => location.href = "login.html"));
+  </script></body>
 </html>
