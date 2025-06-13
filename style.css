@@ -137,3 +137,30 @@ body.modo-accesible button {
 body.modo-accesible .emoji-label {
   color: #ffb3b3;
 }
+
+/* Página offline */
+.offline-page {
+  font-family: sans-serif;
+  text-align: center;
+  padding: 2rem;
+  background-color: #f0f0f0;
+}
+
+.offline-page h1 {
+  color: #e63946;
+}
+
+.offline-page button {
+  margin: 1rem;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  background-color: #e63946;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.offline-page button:hover {
+  background-color: #d62839;
+}
