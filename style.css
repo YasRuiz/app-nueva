@@ -112,17 +112,16 @@ button:hover {
 
 #accesibilidadBtn {
   position: fixed;
-  top: 8px;
-  right: 8px;
-  font-size: 0.85rem;
-  background-color: #333;
-  color: white;
+  top: 10px;
+  right: 10px;
+  font-size: 1.1rem;
+  background-color: transparent;
+  color: #333;
   padding: 6px 10px;
   border: none;
-  border-radius: 6px;
-  z-index: 999;
+  z-index: 1000;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  padding: 6px;
 }
 
 /* Modo oscuro activado */
