@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Registro - Estado de Ánimo</title>
+  <title>Crear cuenta - Estado de Ánimo</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
@@ -12,22 +14,78 @@
 <body>
   <div class="container">
     <h1>Crear cuenta</h1>
+
     <input type="email" id="email" placeholder="Correo electrónico" />
     <input type="password" id="password" placeholder="Contraseña" />
-    
-    <label>Rol:
-      <select id="rol">
-        <option value="alumno">Alumno</option>
-        <option value="docente">Docente</option>
-      </select>
-    </label>
+
+    <label for="rol">Rol:</label>
+    <select id="rol">
+      <option value="alumno">Alumno</option>
+      <option value="docente">Docente</option>
+    </select>
 
     <button id="registroBtn">Registrarse</button>
+
     <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
 
-    <div id="mensaje"></div>
+    <div id="mensaje" class="resultado"></div>
   </div>
 
-  <script type="module" src="auth.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCzkOdieLyx3EwofzjmJIXZXD86HXxwd1U",
+      authDomain: "estado-animo-clase.firebaseapp.com",
+      projectId: "estado-animo-clase",
+      storageBucket: "estado-animo-clase.firebasestorage.app",
+      messagingSenderId: "690883949927",
+      appId: "1:690883949927:web:d8d9f33c41f8df99d5ebc2"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const registroBtn = document.getElementById("registroBtn");
+    const mensaje = document.getElementById("mensaje");
+
+    registroBtn.addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const rol = document.getElementById("rol").value;
+
+      if (!email || !password) {
+        mensaje.textContent = "Por favor completa todos los campos.";
+        return;
+      }
+
+      try {
+        const credenciales = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = credenciales.user.uid;
+
+        // Guardar rol en Firestore
+        await setDoc(doc(db, "usuarios", uid), { rol });
+
+        mensaje.textContent = "✅ Registro exitoso. Redirigiendo...";
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 1500);
+      } catch (error) {
+        mensaje.textContent = "❌ " + traducirError(error.code);
+      }
+    });
+
+    function traducirError(code) {
+      switch (code) {
+        case "auth/email-already-in-use": return "Este correo ya está registrado.";
+        case "auth/invalid-email": return "Correo no válido.";
+        case "auth/weak-password": return "La contraseña debe tener al menos 6 caracteres.";
+        default: return "Error: " + code;
+      }
+    }
+  </script>
 </body>
 </html>
