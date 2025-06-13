@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE html><html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NeuroDiverse</title>
-<link rel="icon" href="img/favicon.ico" type="image/x-icon" />
+  <link rel="icon" href="img/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="style.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#e63946" />
@@ -15,15 +14,11 @@
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js"></script>
 </head>
 <body>
-  <button id="cerrarSesionBtn" style="display: none;">🔒 Cerrar sesión</button>
-
- <nav class="menu-principal">
+  <button id="cerrarSesionBtn" style="display: none;">🔒 Cerrar sesión</button>  <nav class="menu-principal">
     <a href="index.html">🏠 Inicio</a>
     <a href="tdah.html">🌟 Zona TDAH</a>
     <a href="familia.html">👪 Para familias</a>
-  </nav>
-
-  <div class="container" id="main-container">
+  </nav>  <div class="container" id="main-container">
     <h1 tabindex="0">¿Cómo te sientes antes de entrar a clase?</h1>
     <form id="formulario">
       <p>Selecciona tu estado de ánimo:</p>
@@ -33,29 +28,26 @@
         <label><input type="radio" name="estado" value="3" /><div class="emoji-box">😐<br><span class="emoji-label">3 - Regular</span></div></label>
         <label><input type="radio" name="estado" value="4" /><div class="emoji-box">🙂<br><span class="emoji-label">4 - Bien</span></div></label>
         <label><input type="radio" name="estado" value="5" /><div class="emoji-box">😄<br><span class="emoji-label">5 - Excelente</span></div></label>
-      </div>
+      </div><label for="mensaje">¿Quieres dejar un comentario adicional?</label>
+  <textarea id="mensaje" placeholder="Puedes escribir lo que necesites para que tu profesor entienda tu estado..."></textarea>
+  <button id="enviarBtn" type="button" disabled>Enviar</button>
+</form>
 
-      <label for="mensaje">¿Quieres dejar un comentario adicional?</label>
-      <textarea id="mensaje" placeholder="Puedes escribir lo que necesites para que tu profesor entienda tu estado..."></textarea>
-      <button id="enviarBtn" type="button" disabled>Enviar</button>
-    </form>
+<div id="resultado" class="resultado"></div>
+<div id="actividad" class="actividad-sugerida" style="display: none;">
+  <h2>Actividad recomendada</h2>
+  <p id="sugerencia-texto"></p>
+</div>
 
-    <div id="resultado" class="resultado"></div>
-    <div id="actividad" class="actividad-sugerida" style="display: none;">
-      <h2>Actividad recomendada</h2>
-      <p id="sugerencia-texto"></p>
-    </div>
+<div id="panelDocente" style="display: none; margin-top: 30px;">
+  <hr>
+  <h2>👩‍🏫 Herramientas para docentes</h2>
+  <a href="docente.html">
+    <button>📊 Ver estadísticas y respuestas</button>
+  </a>
+</div>
 
-    <div id="panelDocente" style="display: none; margin-top: 30px;">
-      <hr>
-      <h2>👩‍🏫 Herramientas para docentes</h2>
-      <a href="docente.html">
-        <button>📊 Ver estadísticas y respuestas</button>
-      </a>
-    </div>
-  </div>
-
-  <script type="module">
+  </div>  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getFirestore, collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
@@ -104,6 +96,9 @@
         resultado.textContent = "Modo invitado: tu respuesta no será guardada.";
       } else {
         cerrarSesionBtn.style.display = "inline-block";
+        const saludo = `<p>👋 Hola, ${user.email || "usuario"}.</p>`;
+        document.getElementById("main-container").insertAdjacentHTML("afterbegin", saludo);
+
         const docRef = doc(db, "usuarios", user.uid);
         const userDoc = await getDoc(docRef);
         if (userDoc.exists() && userDoc.data().rol === "docente") {
@@ -178,22 +173,15 @@
       speechSynthesis.speak(utterance);
     }
 
-    document.getElementById("modoOscuroBtn").addEventListener("click", () => {
-      document.body.classList.toggle("modo-accesible");
-    });
-
     document.addEventListener("change", () => {
       const estado = document.querySelector('input[name="estado"]:checked');
       enviarBtn.disabled = !estado;
     });
-  </script>
-
-  <script>
+  </script>  <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
         .then(() => console.log('✅ Service Worker registrado'))
         .catch(error => console.error('❌ Error registrando SW:', error));
     }
-  </script>
-</body>
+  </script></body>
 </html>
