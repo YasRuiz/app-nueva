@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Iniciar Sesión - Estado de Ánimo</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Iniciar Sesión</h1>
+    <input type="email" id="email" placeholder="Correo electrónico" />
+    <input type="password" id="password" placeholder="Contraseña" />
+    
+    <button id="loginBtn">Ingresar</button>
+    <button id="guestBtn">Ingresar como Invitado</button>
+    
+    <p><a href="#" id="recuperarClave">¿Olvidaste tu contraseña?</a></p>
+    <p>¿No tienes cuenta? <a href="registro.html">Regístrate aquí</a></p>
+
+    <div id="mensaje"></div>
+  </div>
+
+  <script type="module" src="auth.js"></script>
+</body>
+</html>
