@@ -1,20 +1,20 @@
-const CACHE_NAME = "estado-animo-cache-v1";
+const CACHE_NAME = "estado-animo-cache-v2";
 
-// Archivos esenciales para funcionar sin conexión
 const urlsToCache = [
   "/",
   "/index.html",
   "/style.css",
   "/manifest.json",
-  "/img/icon-192.png",
-  "/img/icon-512.png",
   "/login.html",
   "/registro.html",
   "/docente.html",
-  "/auth.js"
+  "/auth.js",
+  "/offline.html", // Página de fallback offline
+  "/img/icon-192.png",
+  "/img/icon-512.png"
 ];
 
-// Instalación: guarda archivos en caché
+// Instala y guarda los archivos esenciales en caché
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -23,7 +23,7 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Activación: limpia versiones antiguas del caché
+// Limpia versiones anteriores del caché
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) =>
@@ -38,11 +38,14 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Intercepción de peticiones: servir desde caché si es posible
+// Sirve desde caché y muestra fallback si está offline
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((respuesta) => {
-      return respuesta || fetch(event.request);
-    })
+    fetch(event.request).catch(() =>
+      caches.match(event.request).then((response) => {
+        // Si no está en caché, mostrar página offline
+        return response || caches.match("/offline.html");
+      })
+    )
   );
 });
