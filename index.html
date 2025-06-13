@@ -17,35 +17,20 @@
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js"></script>
 </head>
 <body>
-  <div class="container" id="main-container">
-    <button id="accesibilidadBtn">🌓</button>
+  <button id="accesibilidadBtn">🌓</button>
 
+  <div class="container" id="main-container">
     <h1 tabindex="0">¿Cómo te sientes antes de entrar a clase?</h1>
 
     <form id="formulario">
       <p>Selecciona tu estado de ánimo:</p>
 
       <div class="emoji-selector">
-        <label>
-          <input type="radio" name="estado" value="1" />
-          <div class="emoji-box">😔<br><span class="emoji-label">1 - Muy mal</span></div>
-        </label>
-        <label>
-          <input type="radio" name="estado" value="2" />
-          <div class="emoji-box">😟<br><span class="emoji-label">2 - Mal</span></div>
-        </label>
-        <label>
-          <input type="radio" name="estado" value="3" />
-          <div class="emoji-box">😐<br><span class="emoji-label">3 - Regular</span></div>
-        </label>
-        <label>
-          <input type="radio" name="estado" value="4" />
-          <div class="emoji-box">🙂<br><span class="emoji-label">4 - Bien</span></div>
-        </label>
-        <label>
-          <input type="radio" name="estado" value="5" />
-          <div class="emoji-box">😄<br><span class="emoji-label">5 - Excelente</span></div>
-        </label>
+        <label><input type="radio" name="estado" value="1" /><div class="emoji-box">😔<br><span class="emoji-label">1 - Muy mal</span></div></label>
+        <label><input type="radio" name="estado" value="2" /><div class="emoji-box">😟<br><span class="emoji-label">2 - Mal</span></div></label>
+        <label><input type="radio" name="estado" value="3" /><div class="emoji-box">😐<br><span class="emoji-label">3 - Regular</span></div></label>
+        <label><input type="radio" name="estado" value="4" /><div class="emoji-box">🙂<br><span class="emoji-label">4 - Bien</span></div></label>
+        <label><input type="radio" name="estado" value="5" /><div class="emoji-box">😄<br><span class="emoji-label">5 - Excelente</span></div></label>
       </div>
 
       <label for="mensaje">¿Quieres dejar un comentario adicional?</label>
@@ -60,11 +45,20 @@
       <h2>Actividad recomendada</h2>
       <p id="sugerencia-texto"></p>
     </div>
+
+    <!-- Sección para docentes -->
+    <div id="panelDocente" style="display: none; margin-top: 30px;">
+      <hr>
+      <h2>👩‍🏫 Herramientas para docentes</h2>
+      <a href="docente.html">
+        <button>📊 Ver estadísticas y respuestas</button>
+      </a>
+    </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-analytics.js";
 
@@ -81,12 +75,13 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-    const analytics = getAnalytics(app);
+    getAnalytics(app);
 
     const enviarBtn = document.getElementById("enviarBtn");
-    const resultado = document.getElementById('resultado');
-    const actividadDiv = document.getElementById('actividad');
-    const sugerenciaTexto = document.getElementById('sugerencia-texto');
+    const resultado = document.getElementById("resultado");
+    const actividadDiv = document.getElementById("actividad");
+    const sugerenciaTexto = document.getElementById("sugerencia-texto");
+    const panelDocente = document.getElementById("panelDocente");
     let usuario = null;
 
     const sugerencias = {
@@ -97,15 +92,21 @@
       5: "¡Fantástico! ¿Por qué no escribes algo positivo que te pasó hoy?"
     };
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        window.location.href = "login.html"; // Si no hay sesión, redirigir
+        window.location.href = "login.html";
         return;
       }
       usuario = user;
 
       if (user.isAnonymous) {
         resultado.textContent = "Modo invitado: tu respuesta no será guardada.";
+      } else {
+        const docRef = doc(db, "usuarios", user.uid);
+        const userDoc = await getDoc(docRef);
+        if (userDoc.exists() && userDoc.data().rol === "docente") {
+          panelDocente.style.display = "block";
+        }
       }
 
       enviarBtn.disabled = false;
@@ -134,15 +135,14 @@
         return;
       }
 
-      const nuevaRespuesta = {
-        uid: user.uid,
-        estado: parseInt(estado.value),
-        comentario: mensaje || null,
-        fecha: new Date().toISOString()
-      };
-
       try {
-        await addDoc(collection(db, "respuestas"), nuevaRespuesta);
+        await addDoc(collection(db, "respuestas"), {
+          uid: user.uid,
+          estado: parseInt(estado.value),
+          comentario: mensaje || null,
+          fecha: new Date().toISOString()
+        });
+
         resultado.style.backgroundColor = "#fceaea";
         resultado.style.color = "#e63946";
         resultado.innerHTML = `
@@ -150,6 +150,7 @@
           <strong>Estado:</strong> ${estado.value}<br>
           ${mensaje ? `<strong>Comentario:</strong> ${mensaje}` : ""}
         `;
+
         document.getElementById("formulario").reset();
         enviarBtn.disabled = true;
       } catch (error) {
@@ -166,12 +167,12 @@
       speechSynthesis.speak(utterance);
     }
 
-    // Botón accesibilidad
+    // Botón modo oscuro
     document.getElementById("accesibilidadBtn").addEventListener("click", () => {
       document.body.classList.toggle("modo-accesible");
     });
 
-    // Habilitar botón enviar al seleccionar opción
+    // Habilita botón enviar si se elige un estado
     document.addEventListener("change", () => {
       const estado = document.querySelector('input[name="estado"]:checked');
       enviarBtn.disabled = !estado;
