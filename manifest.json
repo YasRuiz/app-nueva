@@ -1,0 +1,23 @@
+{
+  "name": "Estado de Ánimo - NeuroDiverse",
+  "short_name": "Ánimo",
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#e63946",
+  "description": "App para expresar y registrar el estado emocional de estudiantes antes de clase.",
+  "icons": [
+    {
+      "src": "img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "lang": "es"
+}
