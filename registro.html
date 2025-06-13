@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Crear cuenta - Estado de Ánimo</title>
+  <title>Registro - Estado de Ánimo</title>
   <link rel="stylesheet" href="style.css" />
 
   <!-- Firebase SDKs -->
@@ -13,12 +13,10 @@
 </head>
 <body>
   <div class="container">
-    <h1>Crear cuenta</h1>
+    <h1>Registro de usuario</h1>
 
     <input type="email" id="email" placeholder="Correo electrónico" />
     <input type="password" id="password" placeholder="Contraseña" />
-
-    <label for="rol">Rol:</label>
     <select id="rol">
       <option value="alumno">Alumno</option>
       <option value="docente">Docente</option>
@@ -26,15 +24,14 @@
 
     <button id="registroBtn">Registrarse</button>
 
-    <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
-
+    <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión aquí</a></p>
     <div id="mensaje" class="resultado"></div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCzkOdieLyx3EwofzjmJIXZXD86HXxwd1U",
@@ -49,30 +46,35 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    const email = document.getElementById("email");
+    const password = document.getElementById("password");
+    const rol = document.getElementById("rol");
     const registroBtn = document.getElementById("registroBtn");
     const mensaje = document.getElementById("mensaje");
 
     registroBtn.addEventListener("click", async () => {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const rol = document.getElementById("rol").value;
+      const correo = email.value.trim();
+      const clave = password.value.trim();
+      const tipoRol = rol.value;
 
-      if (!email || !password) {
+      mensaje.textContent = "";
+
+      if (!correo || !clave) {
         mensaje.textContent = "Por favor completa todos los campos.";
         return;
       }
 
       try {
-        const credenciales = await createUserWithEmailAndPassword(auth, email, password);
-        const uid = credenciales.user.uid;
+        const cred = await createUserWithEmailAndPassword(auth, correo, clave);
+        const uid = cred.user.uid;
 
-        // Guardar rol en Firestore
-        await setDoc(doc(db, "usuarios", uid), { rol });
+        // Guardar información adicional como el rol
+        await setDoc(doc(db, "usuarios", uid), {
+          email: correo,
+          rol: tipoRol
+        });
 
-        mensaje.textContent = "✅ Registro exitoso. Redirigiendo...";
-        setTimeout(() => {
-          window.location.href = "index.html";
-        }, 1500);
+        window.location.href = "index.html";
       } catch (error) {
         mensaje.textContent = "❌ " + traducirError(error.code);
       }
@@ -80,7 +82,7 @@
 
     function traducirError(code) {
       switch (code) {
-        case "auth/email-already-in-use": return "Este correo ya está registrado.";
+        case "auth/email-already-in-use": return "El correo ya está en uso.";
         case "auth/invalid-email": return "Correo no válido.";
         case "auth/weak-password": return "La contraseña debe tener al menos 6 caracteres.";
         default: return "Error: " + code;
