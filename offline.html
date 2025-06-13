@@ -2,18 +2,16 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sin conexión</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2rem;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="offline-page">
   <h1>😕 Estás sin conexión</h1>
-  <p>Esta parte de la app no está disponible sin internet.</p>
-  <p>Intenta volver a conectarte y recarga la página.</p>
+  <p>No pudimos cargar esta parte de la aplicación.</p>
+  <p>Conéctate a internet y vuelve a intentarlo.</p>
+
+  <button onclick="location.reload()">🔄 Reintentar</button>
+  <button onclick="window.location.href='index.html'">🏠 Ir al inicio</button>
 </body>
 </html>
