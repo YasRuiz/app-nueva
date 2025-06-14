@@ -1,66 +1,127 @@
-/* Estilos generales */ 
+/* Estilos generales */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background-color: #f9f9f9;
+  color: #333;
+}
 
-body { font-family: 'Segoe UI', sans-serif; background-color: #fff8f6; margin: 0; padding: 0; color: #333; }
+.container {
+  max-width: 600px;
+  margin: 30px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
-.container { max-width: 800px; margin: auto; padding: 20px; background-color: #ffffff; box-shadow: 0 0 10px rgba(0,0,0,0.05); border-radius: 10px; }
+h1, h2 {
+  text-align: center;
+  color: #e63946;
+}
 
-h1, h2 { color: #e63946; }
+/* Inputs y textarea */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
 
-nav.menu-principal { background-color: #f1f1f1; padding: 10px; text-align: center; border-bottom: 2px solid #e63946; }
+/* Botones */
+button {
+  background-color: #e63946;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
 
-nav.menu-principal a { margin: 0 10px; text-decoration: none; color: #e63946; font-weight: bold; }
+button:hover {
+  background-color: #d62839;
+}
 
-.emoji-selector { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 15px 0; }
+/* Menú principal */
+.menu-principal {
+  background-color: #e63946;
+  padding: 10px 20px;
+  text-align: center;
+}
 
-.emoji-box { display: inline-block; padding: 10px; border: 2px solid #ccc; border-radius: 10px; cursor: pointer; text-align: center; font-size: 24px; width: 100px; background-color: #f9f9f9; }
+.menu-principal a {
+  color: white;
+  margin: 0 10px;
+  text-decoration: none;
+  font-weight: bold;
+}
 
-.emoji-box:hover { border-color: #e63946; }
+/* Emojis */
+.emoji-selector {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 
-.emoji-label { font-size: 14px; color: #555; }
+.emoji-box {
+  background-color: #f1f1f1;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border 0.3s ease;
+}
 
-textarea, input[type="email"], input[type="password"] { width: 100%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; box-sizing: border-box; }
+input[type="radio"]:checked + .emoji-box {
+  border-color: #e63946;
+}
 
-button { background-color: #e63946; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; margin-top: 10px; }
+/* Resultados y sugerencias */
+.resultado {
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #fceaea;
+  color: #e63946;
+  font-weight: bold;
+  text-align: center;
+}
 
-button:disabled { background-color: #ccc; cursor: not-allowed; }
+.actividad-sugerida {
+  margin-top: 20px;
+  text-align: center;
+}
 
-.resultado { margin-top: 15px; padding: 10px; border-radius: 8px; font-weight: bold; }
+/* Juego de memoria */
+.memory-game {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+}
 
-.actividad-sugerida { margin-top: 20px; padding: 15px; background-color: #f0f4ff; border-left: 5px solid #457b9d; border-radius: 8px; }
+.memory-card {
+  background-color: #f1f1f1;
+  padding: 30px;
+  font-size: 24px;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s ease;
+}
 
-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-
-table, th, td { border: 1px solid #ccc; }
-
-th, td { padding: 10px; text-align: center; }
-
-th { background-color: #fceaea; color: #e63946; }
-
-/* Panel docente */ #panelDocente { background-color: #f9f9f9; padding: 20px; border-radius: 10px; border: 2px dashed #ccc; margin-top: 30px; }
-
-#panelDocente button { background-color: #264653; color: white; font-weight: bold; }
-
-/* Login */ input[type="email"], input[type="password"] { display: block; margin: 0 auto 10px auto; }
-
-.container h1 { text-align: center; }
-
-.container p, .container a { text-align: center; display: block; margin-top: 5px; color: #333; text-decoration: none; }
-
-.container a:hover { color: #e63946; text-decoration: underline; }
-
-/* Juego de memoria */ .memory-game { display: grid; grid-template-columns: repeat(4, 80px); gap: 10px; justify-content: center; margin-top: 20px; }
-
-.memory-card { width: 80px; height: 80px; background-color: #fceaea; border: 2px solid #e63946; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 36px; cursor: pointer; }
-
-.memory-card.flipped { background-color: #fff; }
-
-/* Responsive */ @media (max-width: 600px) { .emoji-selector { flex-direction: column; align-items: center; }
-
-.emoji-box { width: 80%; }
-
-nav.menu-principal a { display: block; margin: 5px 0; }
-
-button { width: 100%; }
-
-.memory-game { grid-template-columns: repeat(3, 80px); } }
-
+.memory-card.flipped {
+  background-color: #e63946;
+  color: white;
+}
