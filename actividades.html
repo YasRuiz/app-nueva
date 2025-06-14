@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Actividades Educativas - NeuroDiverse</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="img/favicon.ico" type="image/x-icon" />
+</head>
+<body>
+  <nav class="menu-principal">
+    <a href="index.html">🏠 Inicio</a>
+    <a href="tdah.html">🌟 Zona TDAH</a>
+    <a href="familia.html">👪 Para familias</a>
+    <a href="actividades.html">🎲 Actividades</a>
+  </nav>
+
+  <div class="container">
+    <h1>🎲 Actividades Educativas</h1>
+    <p>Estas actividades están pensadas para ayudarte a mejorar la concentración, la creatividad y a sentirte mejor.</p>
+
+    <section>
+      <h2>🧠 Atención - Encuentra la diferencia</h2>
+      <p>Observa las dos imágenes y haz clic en las diferencias que encuentres.</p>
+      <img src="img/diferencias1a.png" alt="Imagen A" width="45%">
+      <img src="img/diferencias1b.png" alt="Imagen B" width="45%">
+      <p><em>*Haz clic en las diferencias en la segunda imagen (simulado).</em></p>
+    </section>
+
+    <section>
+      <h2>🧩 Juego de Memoria</h2>
+      <p>Haz clic en dos cartas para encontrar los pares iguales.</p>
+      <div class="memory-game" id="memoryGame"></div>
+    </section>
+
+    <section>
+      <h2>🌬️ Respiración guiada</h2>
+      <p>Presiona el botón y sigue la respiración guiada:</p>
+      <button onclick="reproducirAudio()">🎧 Iniciar audio</button>
+      <audio id="audioRelax" src="audio/respiracion.mp3"></audio>
+    </section>
+  </div>
+
+  <script>
+    const emojis = ["🐶", "🐱", "🐶", "🐱", "🐰", "🐻", "🐰", "🐻"];
+    let firstCard = null;
+    let secondCard = null;
+    let lock = false;
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function createBoard() {
+      const board = document.getElementById("memoryGame");
+      board.innerHTML = "";
+      const shuffled = shuffle([...emojis]);
+      shuffled.forEach(emoji => {
+        const card = document.createElement("div");
+        card.classList.add("memory-card");
+        card.dataset.emoji = emoji;
+        card.textContent = "";
+        card.addEventListener("click", () => flipCard(card));
+        board.appendChild(card);
+      });
+    }
+
+    function flipCard(card) {
+      if (lock || card.classList.contains("flipped")) return;
+      card.textContent = card.dataset.emoji;
+      card.classList.add("flipped");
+
+      if (!firstCard) {
+        firstCard = card;
+      } else {
+        secondCard = card;
+        lock = true;
+        if (firstCard.dataset.emoji === secondCard.dataset.emoji) {
+          firstCard = null;
+          secondCard = null;
+          lock = false;
+        } else {
+          setTimeout(() => {
+            firstCard.textContent = "";
+            secondCard.textContent = "";
+            firstCard.classList.remove("flipped");
+            secondCard.classList.remove("flipped");
+            firstCard = null;
+            secondCard = null;
+            lock = false;
+          }, 1000);
+        }
+      }
+    }
+
+    function reproducirAudio() {
+      const audio = document.getElementById("audioRelax");
+      audio.play();
+    }
+
+    window.onload = createBoard;
+  </script>
+</body>
+</html>
