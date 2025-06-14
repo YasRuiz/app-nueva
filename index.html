@@ -29,17 +29,13 @@
         <label><input type="radio" name="estado" value="3" /><div class="emoji-box">😐<br><span class="emoji-label">3 - Regular</span></div></label>
         <label><input type="radio" name="estado" value="4" /><div class="emoji-box">🙂<br><span class="emoji-label">4 - Bien</span></div></label>
         <label><input type="radio" name="estado" value="5" /><div class="emoji-box">😄<br><span class="emoji-label">5 - Excelente</span></div></label>
-      </div><label for="mensaje">¿Quieres dejar un comentario adicional?</label>
-  <textarea id="mensaje" placeholder="Puedes escribir lo que necesites para que tu profesor entienda tu estado..."></textarea>
-  <button id="enviarBtn" type="button" disabled>Enviar</button>
-</form>
+      </div>
+      <label for="mensaje">¿Quieres dejar un comentario adicional?</label>
+      <textarea id="mensaje" placeholder="Puedes escribir lo que necesites para que tu profesor entienda tu estado..."></textarea>
+      <button id="enviarBtn" type="button" disabled>Enviar</button>
+    </form><div id="resultado" class="resultado"></div>
 
-<div id="resultado" class="resultado"></div>
-<div id="actividad" class="actividad-sugerida" style="display: none;">
-  <h2>Actividad recomendada</h2>
-  <p id="sugerencia-texto"></p>
-  <a href="actividades.html"><button>🎲 Ir a una actividad</button></a>
-</div>
+<div id="actividad" class="actividad-sugerida" style="display: none;"></div>
 
 <div id="panelDocente" style="display: none; margin-top: 30px;">
   <hr>
@@ -73,7 +69,6 @@
     const enviarBtn = document.getElementById("enviarBtn");
     const resultado = document.getElementById("resultado");
     const actividadDiv = document.getElementById("actividad");
-    const sugerenciaTexto = document.getElementById("sugerencia-texto");
     const panelDocente = document.getElementById("panelDocente");
     const cerrarSesionBtn = document.getElementById("cerrarSesionBtn");
     let usuario = null;
@@ -133,8 +128,19 @@
         return;
       }
 
-      const texto = sugerencias[estado.value] || "";
-      sugerenciaTexto.textContent = texto;
+      const valorEstado = parseInt(estado.value);
+      const texto = sugerencias[valorEstado] || "";
+
+      let actividadHTML = `
+        <h2>Actividad recomendada</h2>
+        <p id="sugerencia-texto">${texto}</p>
+      `;
+
+      if (valorEstado <= 3) {
+        actividadHTML += `<a href="actividades.html"><button>🎲 Ir a una actividad</button></a>`;
+      }
+
+      actividadDiv.innerHTML = actividadHTML;
       actividadDiv.style.display = "block";
       leerTexto(texto);
 
@@ -146,7 +152,7 @@
       try {
         await addDoc(collection(db, "respuestas"), {
           uid: user.uid,
-          estado: parseInt(estado.value),
+          estado: valorEstado,
           comentario: mensaje || null,
           fecha: new Date().toISOString()
         });
@@ -155,7 +161,7 @@
         resultado.style.color = "#e63946";
         resultado.innerHTML = `
           ✅ ¡Gracias por compartir tu estado!<br>
-          <strong>Estado:</strong> ${estado.value}<br>
+          <strong>Estado:</strong> ${valorEstado}<br>
           ${mensaje ? `<strong>Comentario:</strong> ${mensaje}` : ""}
         `;
 
