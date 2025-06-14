@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Registro - Estado de Ánimo</title>
+  <title>Registro - NeuroDiverse</title>
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
@@ -14,16 +12,10 @@
 <body>
   <div class="container">
     <h1>Registro de usuario</h1>
-
-    <input type="email" id="email" placeholder="Correo electrónico" />
-    <input type="password" id="password" placeholder="Contraseña" />
-    <select id="rol">
-      <option value="alumno">Alumno</option>
-      <option value="docente">Docente</option>
-    </select>
-
+    <input type="text" id="alias" placeholder="Alias o apodo" required />
+    <input type="email" id="email" placeholder="Correo electrónico" required />
+    <input type="password" id="password" placeholder="Contraseña" required />
     <button id="registroBtn">Registrarse</button>
-
     <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión aquí</a></p>
     <div id="mensaje" class="resultado"></div>
   </div>
@@ -31,7 +23,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-    import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCzkOdieLyx3EwofzjmJIXZXD86HXxwd1U",
@@ -46,48 +38,31 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const email = document.getElementById("email");
-    const password = document.getElementById("password");
-    const rol = document.getElementById("rol");
     const registroBtn = document.getElementById("registroBtn");
     const mensaje = document.getElementById("mensaje");
 
     registroBtn.addEventListener("click", async () => {
-      const correo = email.value.trim();
-      const clave = password.value.trim();
-      const tipoRol = rol.value;
+      const alias = document.getElementById("alias").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
 
-      mensaje.textContent = "";
-
-      if (!correo || !clave) {
-        mensaje.textContent = "Por favor completa todos los campos.";
+      if (!alias || !email || !password) {
+        mensaje.textContent = "❗ Todos los campos son obligatorios.";
         return;
       }
 
       try {
-        const cred = await createUserWithEmailAndPassword(auth, correo, clave);
-        const uid = cred.user.uid;
-
-        // Guardar información adicional como el rol
-        await setDoc(doc(db, "usuarios", uid), {
-          email: correo,
-          rol: tipoRol
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "usuarios", cred.user.uid), {
+          alias,
+          email,
+          rol: "estudiante"
         });
-
         window.location.href = "index.html";
       } catch (error) {
-        mensaje.textContent = "❌ " + traducirError(error.code);
+        mensaje.textContent = "❌ Error: " + error.message;
       }
     });
-
-    function traducirError(code) {
-      switch (code) {
-        case "auth/email-already-in-use": return "El correo ya está en uso.";
-        case "auth/invalid-email": return "Correo no válido.";
-        case "auth/weak-password": return "La contraseña debe tener al menos 6 caracteres.";
-        default: return "Error: " + code;
-      }
-    }
   </script>
 </body>
 </html>
