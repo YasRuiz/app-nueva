@@ -1,4 +1,6 @@
-/* Estilos generales */ body { font-family: 'Segoe UI', sans-serif; background-color: #fff8f6; margin: 0; padding: 0; color: #333; }
+/* Estilos generales */ 
+
+body { font-family: 'Segoe UI', sans-serif; background-color: #fff8f6; margin: 0; padding: 0; color: #333; }
 
 .container { max-width: 800px; margin: auto; padding: 20px; background-color: #ffffff; box-shadow: 0 0 10px rgba(0,0,0,0.05); border-radius: 10px; }
 
@@ -46,11 +48,19 @@ th { background-color: #fceaea; color: #e63946; }
 
 .container a:hover { color: #e63946; text-decoration: underline; }
 
+/* Juego de memoria */ .memory-game { display: grid; grid-template-columns: repeat(4, 80px); gap: 10px; justify-content: center; margin-top: 20px; }
+
+.memory-card { width: 80px; height: 80px; background-color: #fceaea; border: 2px solid #e63946; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 36px; cursor: pointer; }
+
+.memory-card.flipped { background-color: #fff; }
+
 /* Responsive */ @media (max-width: 600px) { .emoji-selector { flex-direction: column; align-items: center; }
 
 .emoji-box { width: 80%; }
 
 nav.menu-principal a { display: block; margin: 5px 0; }
 
-button { width: 100%; } }
+button { width: 100%; }
+
+.memory-game { grid-template-columns: repeat(3, 80px); } }
 
