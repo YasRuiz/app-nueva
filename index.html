@@ -93,14 +93,20 @@
         resultado.textContent = "Modo invitado: tu respuesta no será guardada.";
       } else {
         cerrarSesionBtn.style.display = "inline-block";
-        const saludo = `<p>👋 Hola, ${user.email || "usuario"}.</p>`;
-        document.getElementById("main-container").insertAdjacentHTML("afterbegin", saludo);
 
         const docRef = doc(db, "usuarios", user.uid);
         const userDoc = await getDoc(docRef);
-        if (userDoc.exists() && userDoc.data().rol === "docente") {
-          panelDocente.style.display = "block";
+        let saludo = "👋 Hola";
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          saludo += data.alias ? `, ${data.alias}` : `, ${user.email || "usuario"}`;
+          if (data.rol === "docente") {
+            panelDocente.style.display = "block";
+          }
+        } else {
+          saludo += `, ${user.email || "usuario"}`;
         }
+        document.getElementById("main-container").insertAdjacentHTML("afterbegin", `<p>${saludo}.</p>`);
       }
 
       enviarBtn.disabled = false;
